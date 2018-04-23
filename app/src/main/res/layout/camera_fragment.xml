@@ -10,6 +10,11 @@
 
     </FrameLayout>
 
+    <Gr
+        android:id="@+id/faceOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <ImageButton
         android:id="@+id/imgClose"
         android:layout_width="wrap_content"

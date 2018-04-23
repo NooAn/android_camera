@@ -1,26 +1,22 @@
 package com.camera.bit.cameraandroid
 
 import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.hardware.Camera
+import android.net.Uri
 import android.os.Environment
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import java.io.File
+import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
-import android.graphics.Bitmap
-import java.util.Collections.rotate
-import android.R.attr.data
-import android.graphics.BitmapFactory
-import android.graphics.Matrix
-import java.io.FileNotFoundException
-import android.opengl.ETC1.getHeight
-import android.opengl.ETC1.getWidth
-import android.content.Intent
-import android.net.Uri
 
 
 class CameraView(context1: Context, camera: Camera) : SurfaceView(context1), SurfaceHolder.Callback {
@@ -49,10 +45,9 @@ class CameraView(context1: Context, camera: Camera) : SurfaceView(context1), Sur
 
     override fun surfaceChanged(surfaceHolder: SurfaceHolder?, format: Int, width: Int, height: Int) {
         if (mHolder.surface == null)//check if the surface is ready to receive camera data
-            return;
-
+            return
         try {
-            mCamera?.stopPreview();
+            mCamera?.stopPreview()
         } catch (e: Exception) {
             //this will happen when you are trying the camera if it's not running
         }
@@ -60,6 +55,7 @@ class CameraView(context1: Context, camera: Camera) : SurfaceView(context1), Sur
         val size = camParams?.getSupportedPreviewSizes()?.get(0)
         camParams?.setPreviewSize(size!!.width, size.height)
         mCamera?.parameters = camParams
+
         //now, recreate the camera preview
         try {
             mCamera?.setPreviewDisplay(mHolder)
@@ -170,15 +166,14 @@ class CameraView(context1: Context, camera: Camera) : SurfaceView(context1), Sur
         } catch (e: Exception) {
             e.printStackTrace()
         }
-
     }
 
     fun rotate(bitmap: Bitmap, data: ByteArray): Bitmap {
         val w = bitmap.width
         val h = bitmap.height
         val matrix = Matrix()
+        matrix.preScale(-1f, 1f);
         matrix.setRotate(getOrientation(data).toFloat())
-        matrix.postScale(-1f, 1f)
         return Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, false)
     }
 
