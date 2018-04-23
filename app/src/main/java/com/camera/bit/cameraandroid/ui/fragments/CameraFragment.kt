@@ -29,20 +29,19 @@ class CameraFragment : Fragment() {
         return v
     }
 
-    var mCamera: Camera? = null
+    private var mCamera: Camera? = null
+    var openGallery: ImageView? = null
     var mCameraView: CameraView? = null
+    var cameraView: FrameLayout? = null
 
     private fun initCamera(v: View) {
+        cameraView = v.findViewById(R.id.camera_view) as FrameLayout
+
         try {
             mCamera = Camera.open();//you can use open(int) to use different cameras
+            initCameraOpen()
         } catch (e: Exception) {
             Log.d("LOG", "Failed to get camera: " + e.message);
-        }
-
-        if (mCamera != null) {
-            mCameraView = CameraView(activity?.baseContext!!, mCamera!!)
-            val camera_view = v.findViewById(R.id.camera_view) as FrameLayout
-            camera_view.addView(mCameraView!!);
         }
 
         //btn to close the application
@@ -54,14 +53,33 @@ class CameraFragment : Fragment() {
         val takePicture = v.findViewById<ImageButton>(R.id.takePicture)
         takePicture.setOnClickListener {
             mCameraView?.takePicture()
+            setLastPic()
         }
 
-        val openGallery = v.findViewById<ImageView>(R.id.gallery)
-        openGallery.load(getAllImages(activity?.baseContext!!).last())
-        openGallery.setOnClickListener {
+        openGallery = v.findViewById(R.id.gallery)
+        openGallery?.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
-            fragmentTransaction?.replace(R.id.main, GalleryFragment.newInstance())?.addToBackStack("tag")
+            fragmentTransaction?.replace(R.id.main, GalleryFragment.newInstance())?.addToBackStack("gallery")
             fragmentTransaction?.commit()
         }
+        openGallery?.load(getAllImages(activity?.baseContext!!).lastOrNull() ?: return)
+    }
+
+    override fun onResume() {
+        super.onResume()
+    }
+
+    private fun initCameraOpen() {
+        mCameraView = CameraView(activity?.baseContext!!, mCamera!!)
+        cameraView?.addView(mCameraView!!)
+    }
+
+    private fun setLastPic() {
+        openGallery?.load(getAllImages(activity?.baseContext!!).lastOrNull() ?: return)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        mCameraView?.releaseCamera()
     }
 }

@@ -16,12 +16,12 @@ interface FileSelectionListener {
     fun clickFile()
 }
 
-class CustomPagerAdapter( mContext: Context, var selectionListener: () -> Unit) : PagerAdapter() {
+class CustomPagerAdapter(mContext: Context, var selectionListener: () -> Unit) : PagerAdapter() {
     var mLayoutInflater: LayoutInflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     private var mFiles = mutableListOf<File>()
 
     fun setItems(files: List<File>) {
-        mFiles = files.toMutableList()
+        mFiles = files.reversed().toMutableList()
         notifyDataSetChanged()
     }
 

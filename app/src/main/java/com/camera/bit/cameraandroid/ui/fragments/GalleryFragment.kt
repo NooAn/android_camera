@@ -16,9 +16,8 @@ import java.io.File
 
 class GalleryFragment() : Fragment(), GalleryFragmentView {
     override fun setItems(list: ArrayList<File>) {
-        viewAdapter.setItems(getAllImages(activity?.baseContext!!))
     }
-    
+
     private lateinit var viewAdapter: CustomPagerAdapter
     private var presenter: GalleryPresenter? = null
 

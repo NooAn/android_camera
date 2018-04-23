@@ -27,11 +27,7 @@ class MainActivity : AppCompatActivity() {
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main)
 
-        if (savedInstanceState == null) {
-            val fragmentTransaction = supportFragmentManager.beginTransaction()
-            fragmentTransaction.add(R.id.main, CameraFragment.newInstance())
-            fragmentTransaction.commit()
-        }
+
 
         if (!hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, MY_PERMISSIONS_REQUEST_CAMERA);
@@ -47,7 +43,16 @@ class MainActivity : AppCompatActivity() {
                         arrayOf(Manifest.permission.CAMERA), MY_PERMISSIONS_REQUEST_CAMERA)
             }
         } else {
+            if (savedInstanceState == null) {
+                openCameraFragment()
+            }
         }
+    }
+
+    private fun openCameraFragment() {
+        val fragmentTransaction = supportFragmentManager.beginTransaction()
+        fragmentTransaction.add(R.id.main, CameraFragment.newInstance())
+        fragmentTransaction.commit()
     }
 
     override fun onRequestPermissionsResult(requestCode: Int,
@@ -56,10 +61,7 @@ class MainActivity : AppCompatActivity() {
             MY_PERMISSIONS_REQUEST_SAVE, MY_PERMISSIONS_REQUEST_CAMERA -> {
                 // If request is cancelled, the result arrays are empty.
                 if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-                } else {
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                    Log.e("LOG", "denied perm")
+                    openCameraFragment()
                 }
                 return
             }

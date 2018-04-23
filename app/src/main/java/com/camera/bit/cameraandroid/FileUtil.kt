@@ -5,6 +5,7 @@ import android.net.Uri
 import android.provider.MediaStore
 import java.io.File
 
+
 fun getAllImages(context: Context): List<File> {
     val results = mutableListOf<File>()
     results.addAll(getExternalStorageContent(context))
@@ -34,14 +35,15 @@ private fun getImageFileFromUri(context: Context, uri: Uri): List<File> {
                     MediaStore.MediaColumns.DISPLAY_NAME,
                     MediaStore.MediaColumns.MIME_TYPE),
             null, null, null)
-    
+
     val results = mutableListOf<File>()
-    
+
     while (cursor.moveToNext()) {
         results.add(File(cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA))))
     }
-    
+
     cursor.close()
-    
+
     return results
 }
+
