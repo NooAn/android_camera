@@ -25,7 +25,6 @@ class CameraApi1Activity : Activity() {
 
     private var cameraController: Camera1Controller? = null
     private var mPreview: CameraPreview? = null
-    private var preferences: Preferences? = null
 
     private var cameraId: Int = 0
     private var zoomScaleGestureDetector: ScaleGestureDetector? = null
@@ -186,7 +185,6 @@ class CameraApi1Activity : Activity() {
         button.setText("API 1")
         button.setOnClickListener({ v ->
             Log.i(TAG, "switching to API 2")
-            preferences!!.setModeApi1(false)
             finish()
             startActivity(Intents.createApi2Intent())
         })
