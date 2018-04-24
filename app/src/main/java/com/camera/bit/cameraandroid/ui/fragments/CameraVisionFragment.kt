@@ -5,7 +5,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
-import android.hardware.Camera
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -14,18 +13,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import com.camera.bit.cameraandroid.*
 import com.google.android.gms.vision.CameraSource
+import com.google.android.gms.vision.MultiDetector
 import com.google.android.gms.vision.MultiProcessor
-import com.google.android.gms.vision.Tracker
-import com.google.android.gms.vision.face.Face
+import com.google.android.gms.vision.barcode.BarcodeDetector
 import com.google.android.gms.vision.face.FaceDetector
-import com.google.android.gms.vision.Detector.Detections
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -102,30 +98,31 @@ class CameraVisionFragment : Fragment() {
     private fun createCameraSource() {
 
         val context = activity?.applicationContext
-        val detector = FaceDetector.Builder(context)
-                .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
+
+        val faceDetector = FaceDetector.Builder(context).build()
+        val faceFactory = FaceTrackerFactory(mGraphicOverlay!!)
+        faceDetector.setProcessor(
+                MultiProcessor.Builder(faceFactory).build())
+
+        val barcodeDetector = BarcodeDetector.Builder(context).build()
+        val barcodeFactory = BarcodeTrackerFactory(mGraphicOverlay!!)
+        barcodeDetector.setProcessor(
+                MultiProcessor.Builder(barcodeFactory).build())
+
+
+        val multiDetector = MultiDetector.Builder()
+                .add(faceDetector)
+                .add(barcodeDetector)
                 .build()
 
-        detector.setProcessor(
-                MultiProcessor.Builder<Face>(GraphicFaceTrackerFactory())
-                        .build())
-
-        if (!detector.isOperational) {
-            // Note: The first time that an app using face API is installed on a device, GMS will
-            // download a native library to the device in order to do detection.  Usually this
-            // completes before the app is run for the first time.  But if that download has not yet
-            // completed, then the above call will not detect any faces.
-            //
-            // isOperational() can be used to check if the required native library is currently
-            // available.  The detector will automatically become operational once the library
-            // download completes on device.
+        if (!multiDetector.isOperational) {
             Log.w("LOG", "Face detector dependencies are not yet available.")
         }
 
-        mCameraSource = CameraSource.Builder(context, detector)
-                // .setRequestedPreviewSize(640, 480)
-                .setFacing(CameraSource.CAMERA_FACING_FRONT)
-                .setRequestedFps(30.0f)
+        mCameraSource = CameraSource.Builder(context, multiDetector)
+                .setFacing(CameraSource.CAMERA_FACING_BACK)
+                .setRequestedFps(15.0f)
+                .setRequestedPreviewSize(1600, 1024)
                 .setAutoFocusEnabled(true)
                 .build()
     }
@@ -148,56 +145,6 @@ class CameraVisionFragment : Fragment() {
         }
     }
 
-    /**
-     * Factory for creating a face tracker to be associated with a new face.  The multiprocessor
-     * uses this factory to create face trackers as needed -- one for each individual.
-     */
-    private inner class GraphicFaceTrackerFactory : MultiProcessor.Factory<Face> {
-        override fun create(face: Face): Tracker<Face> {
-            return GraphicFaceTracker(mGraphicOverlay!!)
-        }
-    }
-
-    /**
-     * Face tracker for each detected individual. This maintains a face graphic within the app's
-     * associated face overlay.
-     */
-    private class GraphicFaceTracker(private val mOverlay: GraphicOverlay) : Tracker<Face>() {
-        private val mFaceGraphic: FaceGraphic = FaceGraphic(mOverlay)
-
-
-        /**
-         * Start tracking the detected face instance within the face overlay.
-         */
-        override fun onNewItem(faceId: Int, item: Face?) {
-            mFaceGraphic.setId(faceId)
-        }
-
-        /**
-         * Update the position/characteristics of the face within the overlay.
-         */
-        override fun onUpdate(detectionResults: Detections<Face>?, face: Face?) {
-            mOverlay.add(mFaceGraphic)
-            mFaceGraphic.updateFace(face)
-        }
-
-        /**
-         * Hide the graphic when the corresponding face was not detected.  This can happen for
-         * intermediate frames temporarily (e.g., if the face was momentarily blocked from
-         * view).
-         */
-        override fun onMissing(detectionResults: Detections<Face>?) {
-            mOverlay.remove(mFaceGraphic)
-        }
-
-        /**
-         * Called when the face is assumed to be gone for good. Remove the graphic annotation from
-         * the overlay.
-         */
-        override fun onDone() {
-            mOverlay.remove(mFaceGraphic)
-        }
-    }
 
     fun makePicture(data: ByteArray) {
         val path = generatePicturePath()

@@ -25,7 +25,7 @@ import com.google.android.gms.vision.face.Face;
  * Graphic instance for rendering face position, orientation, and landmarks within an associated
  * graphic overlay view.
  */
-public class FaceGraphic extends GraphicOverlay.Graphic {
+class FaceGraphic2 extends GraphicOverlay.Graphic {
     private static final float FACE_POSITION_RADIUS = 10.0f;
     private static final float ID_TEXT_SIZE = 40.0f;
     private static final float ID_Y_OFFSET = 50.0f;
@@ -51,7 +51,7 @@ public class FaceGraphic extends GraphicOverlay.Graphic {
     private int mFaceId;
     private float mFaceHappiness;
 
-    public FaceGraphic(GraphicOverlay overlay) {
+    public FaceGraphic2(GraphicOverlay overlay) {
         super(overlay);
 
         mCurrentColorIndex = (mCurrentColorIndex + 1) % COLOR_CHOICES.length;
