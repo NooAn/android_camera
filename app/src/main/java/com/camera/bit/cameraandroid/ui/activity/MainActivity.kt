@@ -13,6 +13,7 @@ import android.view.Window
 import android.view.WindowManager
 import com.camera.bit.cameraandroid.R
 import com.camera.bit.cameraandroid.ui.fragments.CameraFragment
+import com.camera.bit.cameraandroid.ui.fragments.CameraVisionFragment
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,8 +27,6 @@ class MainActivity : AppCompatActivity() {
         window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.activity_main)
-
-
 
         if (!hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, MY_PERMISSIONS_REQUEST_CAMERA);
@@ -51,7 +50,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun openCameraFragment() {
         val fragmentTransaction = supportFragmentManager.beginTransaction()
-        fragmentTransaction.add(R.id.main, CameraFragment.newInstance())
+        fragmentTransaction.add(R.id.main, CameraVisionFragment.newInstance())
         fragmentTransaction.commit()
     }
 
