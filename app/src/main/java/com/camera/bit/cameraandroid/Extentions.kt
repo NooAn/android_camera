@@ -24,7 +24,7 @@ fun ImageView.load(file: File) = Glide.with(this)
                 .circleCrop())
         .into(this)
 
-fun Bitmap.rotate(data: ByteArray, orientation: Float): Bitmap {
+fun Bitmap.rotate(orientation: Float): Bitmap {
     val matrix = Matrix()
     matrix.preScale(-1f, 1f);
     matrix.setRotate(orientation)
