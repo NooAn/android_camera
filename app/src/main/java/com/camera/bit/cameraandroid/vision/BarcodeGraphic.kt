@@ -1,9 +1,9 @@
-package com.camera.bit.cameraandroid
+package com.camera.bit.cameraandroid.vision
 
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
-import com.camera.bit.cameraandroid.FaceGraphic.Companion.COLOR_CHOICES
+import com.camera.bit.cameraandroid.vision.FaceGraphic.Companion.COLOR_CHOICES
 import com.google.android.gms.vision.barcode.Barcode
 
 internal class BarcodeGraphic(overlay: GraphicOverlay, private val function: (a: Barcode) -> Unit) : TrackedGraphic<Barcode>(overlay) {

@@ -1,4 +1,4 @@
-package com.camera.bit.cameraandroid
+package com.camera.bit.cameraandroid.vision
 
 import com.google.android.gms.vision.MultiProcessor
 import com.google.android.gms.vision.Tracker

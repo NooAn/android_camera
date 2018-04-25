@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
-import com.camera.bit.cameraandroid.CameraView
+import com.camera.bit.cameraandroid.vision.CameraView
 import com.camera.bit.cameraandroid.R
 import com.camera.bit.cameraandroid.getAllImages
 import com.camera.bit.cameraandroid.load

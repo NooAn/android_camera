@@ -16,6 +16,10 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import com.camera.bit.cameraandroid.*
+import com.camera.bit.cameraandroid.vision.BarcodeTrackerFactory
+import com.camera.bit.cameraandroid.vision.CameraSourcePreview
+import com.camera.bit.cameraandroid.vision.FaceTrackerFactory
+import com.camera.bit.cameraandroid.vision.GraphicOverlay
 import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.MultiDetector
 import com.google.android.gms.vision.MultiProcessor
@@ -81,11 +85,11 @@ class CameraVisionFragment : Fragment() {
             fragmentTransaction?.replace(R.id.main, GalleryFragment.newInstance())?.addToBackStack("gallery")
             fragmentTransaction?.commit()
         }
-        openGallery?.load(getAllImages(activity?.baseContext!!).lastOrNull() ?: return)
+        openGallery?.load(ImageRepository(activity?.baseContext!! ).getAllImages().lastOrNull() ?: return)
     }
 
     private fun setLastPic() {
-        openGallery?.load(getAllImages(activity?.baseContext!!).lastOrNull() ?: return)
+        openGallery?.load(ImageRepository(activity?.baseContext!! ).getAllImages().lastOrNull() ?: return)
     }
 
     override fun onResume() {

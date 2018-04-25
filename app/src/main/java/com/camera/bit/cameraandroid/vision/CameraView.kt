@@ -1,4 +1,4 @@
-package com.camera.bit.cameraandroid
+package com.camera.bit.cameraandroid.vision
 
 import android.content.Context
 import android.content.Intent
@@ -12,7 +12,6 @@ import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import java.io.File
-import java.io.FileNotFoundException
 import java.io.FileOutputStream
 import java.io.IOException
 import java.text.SimpleDateFormat

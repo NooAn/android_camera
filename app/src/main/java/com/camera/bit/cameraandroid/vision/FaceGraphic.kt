@@ -1,4 +1,4 @@
-package com.camera.bit.cameraandroid
+package com.camera.bit.cameraandroid.vision
 
 import android.graphics.Canvas
 import android.graphics.Color

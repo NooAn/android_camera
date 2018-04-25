@@ -1,5 +1,5 @@
 
-package com.camera.bit.cameraandroid;
+package com.camera.bit.cameraandroid.vision;
 
 
 import android.content.Context;

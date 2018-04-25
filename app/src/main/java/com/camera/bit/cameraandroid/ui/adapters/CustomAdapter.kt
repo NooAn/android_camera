@@ -12,11 +12,7 @@ import com.camera.bit.cameraandroid.R
 import com.camera.bit.cameraandroid.loadImage
 import java.io.File
 
-interface FileSelectionListener {
-    fun clickFile()
-}
-
-class CustomPagerAdapter(mContext: Context, var selectionListener: () -> Unit) : PagerAdapter() {
+class CustomPagerAdapter(mContext: Context, var selectionListener: (File) -> Unit) : PagerAdapter() {
     var mLayoutInflater: LayoutInflater = mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
     private var mFiles = mutableListOf<File>()
 
@@ -24,7 +20,7 @@ class CustomPagerAdapter(mContext: Context, var selectionListener: () -> Unit) :
         mFiles = files.reversed().toMutableList()
         notifyDataSetChanged()
     }
-
+    
     override fun getCount(): Int {
         return mFiles.size
     }
@@ -34,16 +30,14 @@ class CustomPagerAdapter(mContext: Context, var selectionListener: () -> Unit) :
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
-        val itemView = mLayoutInflater.inflate(R.layout.viewholder_image_file, container, false)
-
-        val imageView = itemView.findViewById(R.id.viewholderImageView) as ImageView
-
+        val page = mLayoutInflater.inflate(R.layout.viewholder_image_file, container, false)
+        val imageView = page.findViewById(R.id.viewholderImageView) as ImageView
         imageView.loadImage(mFiles[position])
-
-        container.addView(itemView)
-        Log.e("LOG", "err")
-
-        return itemView
+        page.setOnClickListener {
+            selectionListener(mFiles[position])
+        }
+        container.addView(page)
+        return page
     }
 
     override fun destroyItem(container: ViewGroup, position: Int, `object`: Any) {
