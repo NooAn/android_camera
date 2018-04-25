@@ -1,23 +1,12 @@
 package com.camera.bit.cameraandroid
 
 import android.graphics.Canvas
-import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
-import com.google.android.gms.vision.MultiProcessor
-import com.google.android.gms.vision.Tracker
+import com.camera.bit.cameraandroid.FaceGraphic.Companion.COLOR_CHOICES
 import com.google.android.gms.vision.barcode.Barcode
 
-
-internal class BarcodeTrackerFactory(private val mGraphicOverlay: GraphicOverlay) : MultiProcessor.Factory<Barcode> {
-
-    override fun create(barcode: Barcode): Tracker<Barcode> {
-        val graphic = BarcodeGraphic(mGraphicOverlay)
-        return GraphicTracker(mGraphicOverlay, graphic)
-    }
-}
-
-internal class BarcodeGraphic(overlay: GraphicOverlay) : TrackedGraphic<Barcode>(overlay) {
+internal class BarcodeGraphic(overlay: GraphicOverlay, private val function: (a: Barcode) -> Unit) : TrackedGraphic<Barcode>(overlay) {
 
     private val mRectPaint: Paint
     private val mTextPaint: Paint
@@ -32,15 +21,17 @@ internal class BarcodeGraphic(overlay: GraphicOverlay) : TrackedGraphic<Barcode>
         mRectPaint = Paint()
         mRectPaint.color = selectedColor
         mRectPaint.style = Paint.Style.STROKE
-        mRectPaint.strokeWidth = 4.0f
+        mRectPaint.strokeWidth = 2.0f
 
         mTextPaint = Paint()
         mTextPaint.color = selectedColor
+
         mTextPaint.textSize = 36.0f
     }
 
-    override fun updateItem(barcode: Barcode) {
-        mBarcode = barcode
+    override fun updateItem(item: Barcode) {
+        mBarcode = item
+        function(mBarcode!!)
         postInvalidate()
     }
 
@@ -54,13 +45,12 @@ internal class BarcodeGraphic(overlay: GraphicOverlay) : TrackedGraphic<Barcode>
         rect.right = translateX(rect.right)
         rect.bottom = translateY(rect.bottom)
         canvas.drawRect(rect, mRectPaint)
-
+        
         // Draws a label at the bottom of the barcode indicate the barcode value that was detected.
-        canvas.drawText(barcode.rawValue, rect.left, rect.bottom, mTextPaint)
+        // canvas.drawText(barcode.rawValue, rect.left, rect.bottom, mTextPaint)
     }
 
     companion object {
-        private val COLOR_CHOICES = intArrayOf(Color.BLUE, Color.CYAN, Color.GREEN)
         private var mCurrentColorIndex = 0
     }
 }

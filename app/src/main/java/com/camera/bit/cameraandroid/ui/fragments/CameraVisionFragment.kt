@@ -4,7 +4,6 @@ package com.camera.bit.cameraandroid.ui.fragments
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Matrix
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -15,10 +14,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
 import android.widget.ImageView
+import android.widget.TextView
 import com.camera.bit.cameraandroid.*
 import com.google.android.gms.vision.CameraSource
 import com.google.android.gms.vision.MultiDetector
 import com.google.android.gms.vision.MultiProcessor
+import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
 import com.google.android.gms.vision.face.FaceDetector
 import java.io.File
@@ -46,10 +47,19 @@ class CameraVisionFragment : Fragment() {
     private var mCameraSource: CameraSource? = null
     var mGraphicOverlay: GraphicOverlay? = null
     var mPreview: CameraSourcePreview? = null
+    var barcodeText: TextView? = null
 
     private fun initCamera(v: View) {
         mGraphicOverlay = v.findViewById<View>(R.id.faceOverlay) as GraphicOverlay
         mPreview = v.findViewById<View>(R.id.preview) as CameraSourcePreview
+        barcodeText = v.findViewById<TextView>(R.id.textBarcode)
+        barcodeText?.setOnClickListener {
+            if (barcodeText?.text.toString().isNotBlank()) {
+                val i = Intent(Intent.ACTION_VIEW)
+                i.data = Uri.parse(barcodeText?.text.toString())
+                startActivity(i)
+            }
+        }
         createCameraSource()
         //btn to close the application
         val imgClose = v.findViewById<ImageButton>(R.id.imgClose)
@@ -99,13 +109,19 @@ class CameraVisionFragment : Fragment() {
 
         val context = activity?.applicationContext
 
-        val faceDetector = FaceDetector.Builder(context).build()
+        val faceDetector = FaceDetector.Builder(context)
+                .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
+                .build()
         val faceFactory = FaceTrackerFactory(mGraphicOverlay!!)
+
         faceDetector.setProcessor(
                 MultiProcessor.Builder(faceFactory).build())
 
+
         val barcodeDetector = BarcodeDetector.Builder(context).build()
-        val barcodeFactory = BarcodeTrackerFactory(mGraphicOverlay!!)
+        val barcodeFactory = BarcodeTrackerFactory(mGraphicOverlay!!) {
+            showBarcode(it)
+        }
         barcodeDetector.setProcessor(
                 MultiProcessor.Builder(barcodeFactory).build())
 
@@ -121,10 +137,17 @@ class CameraVisionFragment : Fragment() {
 
         mCameraSource = CameraSource.Builder(context, multiDetector)
                 .setFacing(CameraSource.CAMERA_FACING_BACK)
-                .setRequestedFps(15.0f)
+                .setRequestedFps(20.0f)
+                // .setRequestedPreviewSize(640, 480)
                 .setRequestedPreviewSize(1600, 1024)
                 .setAutoFocusEnabled(true)
                 .build()
+    }
+
+    private fun showBarcode(barcode: Barcode) {
+        if (barcode.rawValue.isNotEmpty()) {
+            barcodeText?.text = barcode.rawValue
+        }
     }
 
 
@@ -170,7 +193,7 @@ class CameraVisionFragment : Fragment() {
             bmOptions.inPurgeable = true
 
             val realImage = BitmapFactory.decodeByteArray(data, 0, data.size, bmOptions)
-            val bitmap = rotate(realImage, data)
+            val bitmap = realImage.rotate(data, getOrientation(data).toFloat())
             bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos)
             realImage.recycle()
             fos.flush()
@@ -181,6 +204,7 @@ class CameraVisionFragment : Fragment() {
             fos.close()
         }
         path?.let {
+            //update photo storage for system
             addMediaToGallery(it.path)
         }
     }
@@ -198,51 +222,24 @@ class CameraVisionFragment : Fragment() {
 
     private fun generatePicturePath(): File? {
         try {
-            val storageDir = getAlbumDir()
             val date = Date()
             date.time = System.currentTimeMillis() + Random().nextInt(1000) + 1
             val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(date)
-            return File(storageDir, "IMG_$timeStamp.jpg")
+            return File(getAlbumDir(), "IMG_$timeStamp.jpg")
         } catch (e: Exception) {
         }
         return null
     }
 
     fun addMediaToGallery(fromPath: String?) {
-        if (fromPath == null) {
-            return
-        }
+        fromPath ?: return
         val f = File(fromPath)
         val contentUri = Uri.fromFile(f)
-        addMediaToGallery(contentUri)
-    }
-
-    fun addMediaToGallery(uri: Uri?) {
-        if (uri == null) {
-            return
-        }
-        try {
-            val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)
-            mediaScanIntent.data = uri
-            activity?.sendBroadcast(mediaScanIntent)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    fun rotate(bitmap: Bitmap, data: ByteArray): Bitmap {
-        val w = bitmap.width
-        val h = bitmap.height
-        val matrix = Matrix()
-        matrix.preScale(-1f, 1f);
-        matrix.setRotate(getOrientation(data).toFloat())
-        return Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, false)
+        contentUri.addMediaToGallery(activity)
     }
 
     private fun getOrientation(jpeg: ByteArray?): Int {
-        if (jpeg == null) {
-            return 0
-        }
+        jpeg ?: return 0
 
         var offset = 0
         var length = 0
@@ -332,3 +329,7 @@ class CameraVisionFragment : Fragment() {
     }
 
 }
+
+
+
+

@@ -44,12 +44,13 @@ class CameraView(context1: Context, camera: Camera) : SurfaceView(context1), Sur
     }
 
     override fun surfaceChanged(surfaceHolder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-        if (mHolder.surface == null)//check if the surface is ready to receive camera data
-            return
+        mHolder.surface ?: return ///check if the surface is ready to receive camera data
+
         try {
             mCamera?.stopPreview()
         } catch (e: Exception) {
             //this will happen when you are trying the camera if it's not running
+            e.printStackTrace()
         }
         val camParams = mCamera?.getParameters()
         val size = camParams?.getSupportedPreviewSizes()?.get(0)
@@ -107,10 +108,6 @@ class CameraView(context1: Context, camera: Camera) : SurfaceView(context1), Sur
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos)
                 fos.flush()
                 fos.fd.sync()
-            } catch (e: FileNotFoundException) {
-                Log.d("LOG", "File not found: " + e.message)
-            } catch (e: IOException) {
-                Log.d("LOG", "Error accessing file: " + e.message)
             } catch (e: Exception) {
                 e.printStackTrace()
             } finally {
@@ -177,72 +174,6 @@ class CameraView(context1: Context, camera: Camera) : SurfaceView(context1), Sur
         return Bitmap.createBitmap(bitmap, 0, 0, w, h, matrix, false)
     }
 
-    //    fun takePicture(path: File, session: CameraSession?, callback: Runnable?): Boolean {
-//        if (session == null) {
-//            return false
-//        }
-//        val info = session!!.cameraInfo
-//        val camera = info.camera
-//        try {
-//            camera.takePicture(null, null, Camera.PictureCallback { data, camera ->
-//                var bitmap: Bitmap? = null
-//                val size = (AndroidUtilities.getPhotoSize() / AndroidUtilities.density) as Int
-//                val key = String.format(Locale.US, "%s@%d_%d", Utilities.MD5(path.getAbsolutePath()), size, size)
-//                try {
-//                    val options = BitmapFactory.Options()
-//                    options.inJustDecodeBounds = true
-//                    BitmapFactory.decodeByteArray(data, 0, data.size, options)
-//                    var scaleFactor = Math.max(options.outWidth.toFloat() / AndroidUtilities.getPhotoSize(), options.outHeight.toFloat() / AndroidUtilities.getPhotoSize())
-//                    if (scaleFactor < 1) {
-//                        scaleFactor = 1f
-//                    }
-//                    options.inJustDecodeBounds = false
-//                    options.inSampleSize = scaleFactor.toInt()
-//                    options.inPurgeable = true
-//                    bitmap = BitmapFactory.decodeByteArray(data, 0, data.size, options)
-//                } catch (e: Throwable) {
-//                }
-//
-//                try {
-//                    if (info.frontCamera !== 0) {
-//                        try {
-//                            val matrix = Matrix()
-//                            matrix.setRotate(getOrientation(data).toFloat())
-//                            matrix.postScale(-1f, 1f)
-//                            val scaled = Bitmaps.createBitmap(bitmap, 0, 0, bitmap!!.width, bitmap.height, matrix, false)
-//                            bitmap.recycle()
-//                            val outputStream = FileOutputStream(path)
-//                            scaled!!.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
-//                            outputStream.flush()
-//                            outputStream.getFD().sync()
-//                            outputStream.close()
-//                            if (scaled != null) {
-//                            }
-//                            callback?.run()
-//                            return@PictureCallback
-//                        } catch (e: Throwable) {
-//                        }
-//
-//                    }
-//                    val outputStream = FileOutputStream(path)
-//                    outputStream.write(data)
-//                    outputStream.flush()
-//                    outputStream.getFD().sync()
-//                    outputStream.close()
-//                    if (bitmap != null) {
-//                    }
-//                } catch (e: Exception) {
-//                }
-//
-//                callback?.run()
-//            })
-//            return true
-//        } catch (e: Exception) {
-//        }
-//
-//        return false
-//    }
-//
     private fun getOrientation(jpeg: ByteArray?): Int {
         if (jpeg == null) {
             return 0
