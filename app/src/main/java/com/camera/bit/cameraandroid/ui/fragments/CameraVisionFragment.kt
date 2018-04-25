@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.transition.*
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -29,6 +30,7 @@ import com.google.android.gms.vision.barcode.BarcodeDetector
 import com.google.android.gms.vision.face.FaceDetector
 import java.io.File
 import java.io.IOException
+
 
 class CameraVisionFragment : Fragment(), CameraFragmentView {
 
@@ -82,7 +84,15 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
         openGallery = v.findViewById(R.id.gallery)
         openGallery?.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
-            fragmentTransaction?.replace(R.id.main, GalleryFragment.newInstance())?.addToBackStack("gallery")
+            val gallery = GalleryFragment.newInstance()
+            gallery.sharedElementEnterTransition = DetailsTransition()
+            gallery.enterTransition = Fade()
+            exitTransition = Fade()
+            gallery.sharedElementReturnTransition = DetailsTransition()
+            fragmentTransaction
+                    ?.replace(R.id.main, gallery)
+                    ?.addSharedElement(openGallery, "firstImage")
+                    ?.addToBackStack("gallery")
             fragmentTransaction?.commit()
         }
         openGallery?.load(ImageRepository(activity?.baseContext!!).getAllImages().lastOrNull()
@@ -183,6 +193,12 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
 
 }
 
-
+class DetailsTransition : TransitionSet() {
+    init {
+        ordering = ORDERING_TOGETHER;
+        addTransition(ChangeBounds())
+                .addTransition(ChangeTransform()).addTransition(ChangeImageTransform());
+    }
+}
 
 

@@ -19,7 +19,7 @@ import java.io.File
 class GalleryFragment() : Fragment(), GalleryFragmentView {
 
     private lateinit var viewAdapter: CustomPagerAdapter
-    private var presenter = GalleryPresenter(ImageRepository(activity?.baseContext!!))
+    private var presenter = GalleryPresenter(ImageRepository(context!!))
 
     companion object {
         fun newInstance(): GalleryFragment {
@@ -30,6 +30,7 @@ class GalleryFragment() : Fragment(), GalleryFragmentView {
     var viewPager: ViewPager? = null
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.gallery_fragment, container, false)
+        presenter = GalleryPresenter(ImageRepository(activity?.baseContext!!))
         presenter.attachView(this)
 
         val share = v.findViewById<ImageView>(R.id.shareImage)
