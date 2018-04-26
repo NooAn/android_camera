@@ -34,8 +34,6 @@ class MainActivity : AppCompatActivity() {
 
         if (ContextCompat.checkSelfPermission(this,
                         Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-
-            // Should we show an explanation?
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this,
                             Manifest.permission.CAMERA)) {
                 ActivityCompat.requestPermissions(this,
@@ -64,9 +62,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 return
             }
-        // Add other 'when' lines to check for other
-        // permissions this app might request.
-
             else -> {
                 // Ignore all other requests.
             }

@@ -60,7 +60,7 @@ class CameraFragment : Fragment() {
             fragmentTransaction?.replace(R.id.main, GalleryFragment.newInstance())?.addToBackStack("gallery")
             fragmentTransaction?.commit()
         }
-       // openGallery?.load(getAllImages(activity?.baseContext!!).lastOrNull() ?: return)
+       // btnGallery?.load(getAllImages(activity?.baseContext!!).lastOrNull() ?: return)
     }
 
     override fun onResume() {
@@ -73,7 +73,7 @@ class CameraFragment : Fragment() {
     }
 
     private fun setLastPic() {
-      //  openGallery?.load(getAllImages(activity?.baseContext!!).lastOrNull() ?: return)
+      //  btnGallery?.load(getAllImages(activity?.baseContext!!).lastOrNull() ?: return)
     }
 
     override fun onPause() {

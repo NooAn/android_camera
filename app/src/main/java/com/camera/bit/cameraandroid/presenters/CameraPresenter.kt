@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Environment
+import com.camera.bit.cameraandroid.ImageRepository
 import com.camera.bit.cameraandroid.rotate
 import com.camera.bit.cameraandroid.view.CameraFragmentView
 import com.google.android.gms.vision.barcode.Barcode
@@ -13,13 +14,17 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-class CameraPresenter : BasePresenter<CameraFragmentView>() {
+class CameraPresenter(private val imageRepository: ImageRepository) : BasePresenter<CameraFragmentView>() {
     fun clickBarcodeText(text: String) {
         if (text.isNotBlank()) {
             val i = Intent(Intent.ACTION_VIEW)
             i.data = Uri.parse(text)
             view?.openWeb(i)
         }
+    }
+
+    fun takeLastPicture() {
+        view?.showLastPicture(imageRepository.getAllImages().lastOrNull() ?: return)
     }
 
     fun makePicture(data: ByteArray) {

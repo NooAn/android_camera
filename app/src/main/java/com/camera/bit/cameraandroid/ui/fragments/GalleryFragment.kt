@@ -19,7 +19,7 @@ import java.io.File
 class GalleryFragment() : Fragment(), GalleryFragmentView {
 
     private lateinit var viewAdapter: CustomPagerAdapter
-    private var presenter = GalleryPresenter(ImageRepository(context!!))
+    private lateinit var presenter: GalleryPresenter
 
     companion object {
         fun newInstance(): GalleryFragment {
@@ -46,6 +46,32 @@ class GalleryFragment() : Fragment(), GalleryFragmentView {
         viewPager = v.findViewById<ViewPager>(R.id.pager).apply {
             adapter = viewAdapter
         }
+
+        viewPager?.setPageTransformer(true, { view, position ->
+            view.setBackgroundColor(resources.getColor(R.color.black))
+            if (position < -1) {
+                view.alpha = 0f
+            } else if (position <= 1) { // [-1,1]
+                val misScale = 0.85f;
+                val scaleFactor = Math.max(misScale, 1 - Math.abs(position))
+                val vertMargin = view.height * (1 - scaleFactor) / 2
+                val horzMargin = view.width * (1 - scaleFactor) / 2
+                if (position < 0) {
+                    view.translationX = horzMargin - vertMargin / 2
+                } else view.translationX = -horzMargin + vertMargin / 2
+
+                view.scaleX = scaleFactor
+                view.scaleY = scaleFactor
+
+                // Fade the page relative to its size.
+                val minAlpha = 0.5f;
+                view.alpha = minAlpha + (scaleFactor - misScale) / (1 - misScale) * (1 - minAlpha)
+
+            } else {
+                // This page is way off-screen to the right.
+                view.alpha = 0f
+            }
+        })
         viewPager?.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(state: Int) {
 

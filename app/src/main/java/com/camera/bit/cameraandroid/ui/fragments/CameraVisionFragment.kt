@@ -7,6 +7,7 @@ import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.transition.*
 import android.util.Log
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -44,7 +45,11 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
         }
     }
 
-    private val presenter = CameraPresenter()
+    private lateinit var presenter: CameraPresenter
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        presenter = CameraPresenter(ImageRepository(activity?.baseContext!!))
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val v = inflater.inflate(R.layout.camera_vision_fragment, container, false)
@@ -54,7 +59,7 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
     }
 
 
-    var openGallery: ImageView? = null
+    var btnGallery: ImageView? = null
     private var mCameraSource: CameraSource? = null
     var mGraphicOverlay: GraphicOverlay? = null
     var mPreview: CameraSourcePreview? = null
@@ -67,13 +72,14 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
         barcodeText?.setOnClickListener {
             presenter.clickBarcodeText(barcodeText?.text.toString())
         }
-        createCameraSource()
-        //btn to close the application
-        val imgClose = v.findViewById<ImageButton>(R.id.imgClose)
-        imgClose.setOnClickListener {
-            activity?.finish()
-        }
+        createCameraSource(CameraSource.CAMERA_FACING_BACK)
 
+
+        //btn to close the application
+        val changeCamera = v.findViewById<ImageView>(R.id.switchCamera)
+        changeCamera.setOnClickListener {
+            changeCamera()
+        }
         val takePicture = v.findViewById<ImageButton>(R.id.takePicture)
         takePicture.setOnClickListener {
             mCameraSource?.takePicture(null) {
@@ -81,27 +87,40 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
             }
         }
 
-        openGallery = v.findViewById(R.id.gallery)
-        openGallery?.setOnClickListener {
+        btnGallery = v.findViewById(R.id.gallery)
+        btnGallery?.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
             val gallery = GalleryFragment.newInstance()
-            gallery.sharedElementEnterTransition = DetailsTransition()
-            gallery.enterTransition = Fade()
+
+
+            //setEnterTransition(fadeTransition)
+            // exitTransition = Fade()
+            //   gallery.enterTransition = Fade()
+            //  gallery.exitTransition = Fade()
+//
+//            gallery.sharedElementReturnTransition = DetailsTransition()
+//            gallery.sharedElementEnterTransition = DetailsTransition()
+//            sharedElementEnterTransition = DetailsTransition()
+//            sharedElementReturnTransition = DetailsTransition()
+            val slideTransition = Slide(Gravity.RIGHT)
+            slideTransition.duration = 700;
             exitTransition = Fade()
-            gallery.sharedElementReturnTransition = DetailsTransition()
+            enterTransition = Fade()
+            gallery.enterTransition = slideTransition;
+            gallery.sharedElementEnterTransition = ChangeBounds()
+            gallery.allowEnterTransitionOverlap = false;
+            gallery.allowReturnTransitionOverlap = false;
             fragmentTransaction
                     ?.replace(R.id.main, gallery)
-                    ?.addSharedElement(openGallery, "firstImage")
+                    ?.addSharedElement(btnGallery, "firstImage")
                     ?.addToBackStack("gallery")
             fragmentTransaction?.commit()
         }
-        openGallery?.load(ImageRepository(activity?.baseContext!!).getAllImages().lastOrNull()
-                ?: return)
+        presenter.takeLastPicture()
     }
 
     override fun showLastPicture(path: File) {
-        ///ImageRepository(activity?.baseContext!!).getAllImages().lastOrNull()
-        openGallery?.load(path)
+        btnGallery?.load(path)
     }
 
     override fun onResume() {
@@ -122,10 +141,26 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
 
     override fun onDestroy() {
         super.onDestroy()
-        mCameraSource?.release()
     }
 
-    private fun createCameraSource() {
+    var cameraNow = CameraSource.CAMERA_FACING_BACK
+
+    fun changeCamera() {
+        mCameraSource?.release()
+        mPreview?.release()
+        mPreview?.destroyDrawingCache()
+        mCameraSource = null
+        if (cameraNow == CameraSource.CAMERA_FACING_BACK) {
+            createCameraSource(CameraSource.CAMERA_FACING_FRONT)
+            cameraNow = CameraSource.CAMERA_FACING_FRONT
+        } else {
+            createCameraSource(CameraSource.CAMERA_FACING_BACK)
+            cameraNow = CameraSource.CAMERA_FACING_BACK
+        }
+
+    }
+
+    private fun createCameraSource(facing: Int) {
 
         val context = activity?.applicationContext
 
@@ -156,8 +191,8 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
         }
 
         mCameraSource = CameraSource.Builder(context, multiDetector)
-                .setFacing(CameraSource.CAMERA_FACING_BACK)
-                .setRequestedFps(20.0f)
+                .setFacing(facing)
+                .setRequestedFps(16.0f)
                 // .setRequestedPreviewSize(640, 480)
                 .setRequestedPreviewSize(1600, 1024)
                 .setAutoFocusEnabled(true)
@@ -197,7 +232,7 @@ class DetailsTransition : TransitionSet() {
     init {
         ordering = ORDERING_TOGETHER;
         addTransition(ChangeBounds())
-                .addTransition(ChangeTransform()).addTransition(ChangeImageTransform());
+                .addTransition(ChangeImageTransform());
     }
 }
 
