@@ -51,7 +51,7 @@ class CameraPresenter(private val imageRepository: ImageRepository) : BasePresen
 
             val realImage = BitmapFactory.decodeByteArray(data, 0, data.size, bmOptions)
             val bitmap = realImage.rotate(getOrientation(data).toFloat())
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 80, fos)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
             realImage.recycle()
             fos.flush()
             fos.fd.sync()

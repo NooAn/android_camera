@@ -1,6 +1,7 @@
 package com.camera.bit.cameraandroid.ui.fragments
 
 
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -31,7 +32,6 @@ import com.google.android.gms.vision.barcode.BarcodeDetector
 import com.google.android.gms.vision.face.FaceDetector
 import java.io.File
 import java.io.IOException
-
 
 class CameraVisionFragment : Fragment(), CameraFragmentView {
 
@@ -72,10 +72,9 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
         barcodeText?.setOnClickListener {
             presenter.clickBarcodeText(barcodeText?.text.toString())
         }
-        createCameraSource(CameraSource.CAMERA_FACING_BACK)
+        createDetector()
+        createCameraSource(context, multiDetector, CameraSource.CAMERA_FACING_BACK)
 
-
-        //btn to close the application
         val changeCamera = v.findViewById<ImageView>(R.id.switchCamera)
         changeCamera.setOnClickListener {
             changeCamera()
@@ -91,17 +90,6 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
         btnGallery?.setOnClickListener {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
             val gallery = GalleryFragment.newInstance()
-
-
-            //setEnterTransition(fadeTransition)
-            // exitTransition = Fade()
-            //   gallery.enterTransition = Fade()
-            //  gallery.exitTransition = Fade()
-//
-//            gallery.sharedElementReturnTransition = DetailsTransition()
-//            gallery.sharedElementEnterTransition = DetailsTransition()
-//            sharedElementEnterTransition = DetailsTransition()
-//            sharedElementReturnTransition = DetailsTransition()
             val slideTransition = Slide(Gravity.RIGHT)
             slideTransition.duration = 700;
             exitTransition = Fade()
@@ -136,7 +124,6 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
     override fun onDestroyView() {
         super.onDestroyView()
         mCameraSource?.release()
-
     }
 
     override fun onDestroy() {
@@ -144,23 +131,19 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
     }
 
     var cameraNow = CameraSource.CAMERA_FACING_BACK
-
     fun changeCamera() {
-        mCameraSource?.release()
-        mPreview?.release()
+        mCameraSource?.stop()
         mPreview?.destroyDrawingCache()
-        mCameraSource = null
-        if (cameraNow == CameraSource.CAMERA_FACING_BACK) {
-            createCameraSource(CameraSource.CAMERA_FACING_FRONT)
-            cameraNow = CameraSource.CAMERA_FACING_FRONT
-        } else {
-            createCameraSource(CameraSource.CAMERA_FACING_BACK)
-            cameraNow = CameraSource.CAMERA_FACING_BACK
-        }
-
+        // change camera with use operation XOR because we have only 1 or 0.
+        cameraNow = cameraNow.xor(1)
+        Log.e("LOG", "cameraNow $cameraNow")
+        createCameraSource(context, multiDetector, cameraNow)
+        startCameraSource()
     }
 
-    private fun createCameraSource(facing: Int) {
+    var multiDetector: MultiDetector? = null
+
+    private fun createDetector() {
 
         val context = activity?.applicationContext
 
@@ -172,7 +155,6 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
         faceDetector.setProcessor(
                 MultiProcessor.Builder(faceFactory).build())
 
-
         val barcodeDetector = BarcodeDetector.Builder(context).build()
         val barcodeFactory = BarcodeTrackerFactory(mGraphicOverlay!!) {
             presenter.showBarcode(it)
@@ -181,18 +163,20 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
                 MultiProcessor.Builder(barcodeFactory).build())
 
 
-        val multiDetector = MultiDetector.Builder()
+        multiDetector = MultiDetector.Builder()
                 .add(faceDetector)
                 .add(barcodeDetector)
                 .build()
 
-        if (!multiDetector.isOperational) {
+        if (multiDetector?.isOperational == false) {
             Log.w("LOG", "Face detector dependencies are not yet available.")
         }
+    }
 
+    private fun createCameraSource(context: Context?, multiDetector: MultiDetector?, facing: Int) {
         mCameraSource = CameraSource.Builder(context, multiDetector)
                 .setFacing(facing)
-                .setRequestedFps(16.0f)
+                .setRequestedFps(20.0f)
                 // .setRequestedPreviewSize(640, 480)
                 .setRequestedPreviewSize(1600, 1024)
                 .setAutoFocusEnabled(true)
@@ -202,7 +186,6 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
     override fun showBarcode(barcode: String) {
         barcodeText?.text = barcode
     }
-
 
     /**
      * Starts or restarts the camera source, if it exists.  If the camera source doesn't exist yet
@@ -221,10 +204,8 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
         }
     }
 
-
     override fun addMediaToGallery(path: String) =
             Uri.fromFile(File(path)).addMediaToGallery(activity)
-
 
 }
 
