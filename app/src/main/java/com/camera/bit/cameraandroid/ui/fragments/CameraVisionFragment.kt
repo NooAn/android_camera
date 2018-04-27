@@ -72,13 +72,16 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
         barcodeText?.setOnClickListener {
             presenter.clickBarcodeText(barcodeText?.text.toString())
         }
+
         createDetector()
         createCameraSource(context, multiDetector, CameraSource.CAMERA_FACING_BACK)
 
         val changeCamera = v.findViewById<ImageView>(R.id.switchCamera)
         changeCamera.setOnClickListener {
+            changeCamera.animate().start()
             changeCamera()
         }
+
         val takePicture = v.findViewById<ImageButton>(R.id.takePicture)
         takePicture.setOnClickListener {
             mCameraSource?.takePicture(null) {
@@ -91,13 +94,13 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
             val fragmentTransaction = activity?.supportFragmentManager?.beginTransaction()
             val gallery = GalleryFragment.newInstance()
             val slideTransition = Slide(Gravity.RIGHT)
-            slideTransition.duration = 700;
+            slideTransition.duration = 700
             exitTransition = Fade()
             enterTransition = Fade()
-            gallery.enterTransition = slideTransition;
+            gallery.enterTransition = slideTransition
             gallery.sharedElementEnterTransition = ChangeBounds()
-            gallery.allowEnterTransitionOverlap = false;
-            gallery.allowReturnTransitionOverlap = false;
+            gallery.allowEnterTransitionOverlap = true
+            gallery.allowReturnTransitionOverlap = true
             fragmentTransaction
                     ?.replace(R.id.main, gallery)
                     ?.addSharedElement(btnGallery, "firstImage")
@@ -136,7 +139,6 @@ class CameraVisionFragment : Fragment(), CameraFragmentView {
         mPreview?.destroyDrawingCache()
         // change camera with use operation XOR because we have only 1 or 0.
         cameraNow = cameraNow.xor(1)
-        Log.e("LOG", "cameraNow $cameraNow")
         createCameraSource(context, multiDetector, cameraNow)
         startCameraSource()
     }

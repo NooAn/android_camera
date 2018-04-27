@@ -12,7 +12,6 @@ import android.util.Log
 import android.view.Window
 import android.view.WindowManager
 import com.camera.bit.cameraandroid.R
-import com.camera.bit.cameraandroid.ui.fragments.CameraFragment
 import com.camera.bit.cameraandroid.ui.fragments.CameraVisionFragment
 
 class MainActivity : AppCompatActivity() {

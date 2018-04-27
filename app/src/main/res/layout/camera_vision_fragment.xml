@@ -28,8 +28,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center"
         android:layout_margin="24dp"
-        android:background="?android:attr/selectableItemBackground"
-        android:src="@drawable/burst_editor_selection_circle" />
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/push_selection_circle" />
 
     <ImageView
         android:id="@+id/gallery"
@@ -37,11 +39,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
         android:layout_margin="24dp"
-
-        android:transitionName="firstImage"
+        android:background="?attr/selectableItemBackground"
+        android:clickable="true"
         android:contentDescription="photo"
+        android:focusable="true"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_photo" />
+        android:src="@drawable/ic_photo"
+        android:transitionName="firstImage" />
 
     <ImageView
         android:id="@+id/switchCamera"
@@ -49,8 +53,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|left"
         android:layout_margin="24dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
         android:scaleType="fitCenter"
-        android:src="@drawable/ic_share" />
+        android:src="@drawable/front_back_switch_button" />
 
     <TextView
         android:id="@+id/textBarcode"
